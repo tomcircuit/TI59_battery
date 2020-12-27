@@ -1,4 +1,4 @@
- m# TI59_battery - LiPo Battery for TI-58/59 Calculators
+ # TI59_battery - LiPo Battery for TI-58/59 Calculators
  
 This is my attempt at a LiPo-based battery pack for Texas Instruments Calculators that use the BP01 battery pack,  specifically the TI-58, TI-58C, and TI-59. The original NiCd packs are all dead by now, and rebuilding them is difficult, mostly because it requires cutting apart and then carefully re-assembling the plastic battery retention frame. I thought it would be fun to design a 3D printed housing and re-use the circuitry from my rechargeable HP LiPo battery pack. 
 
