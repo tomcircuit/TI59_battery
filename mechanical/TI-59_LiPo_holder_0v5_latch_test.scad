@@ -3,12 +3,11 @@
   This is intended to hold a PCB and a LiPo battery,
   and charge from USB. 
 
-  Dimensions more or less 'cribbed' from a BP-1 and an
-  existing STL model that I imported into FreeCAD to measure.
+  Dimensions measured from several TI-58 and TI-59 calculators and a BP-1.
 
-  Version 1.1
+  Version 0.5
   T. LeMense
-  December 21, 2020
+  January 8, 2021
 */
 
 
@@ -16,40 +15,46 @@ $fa = 1;
 $fs = 0.4;
 
 // baseplate (first surface)
-base_t = 1.0;
-base_w = 44.85;
-base_l = 56.4;
-ledge_t = 1.25;
-ledge_t1 = 0.75;
-ledge_t2 = 1.85;
+base_t = 1.0;  // base thickness (measured)
+base_w = 44.5;  // width (measured)
+base_w3 = 14.4;  // ledge width from pol slot to latch end (measured)
+base_w1 = 13.6;  // ledge w from round end to pol slot (measured)
+base_w2 = base_w-base_w1-base_w3;  // calculate pol slot w (measured 16.4mm)
+base_l = 56.4;   // length (measured)
+ledge_t = 1.4;  // ledge along short sides (improved)
+ledge_t1 = 0.75; // ledge step-back along curved long side
+ledge_t2 = 2.1;  // ledge along latch side (measured)
+
+// contact Z offset (absolute to bottom of base, measured)
+contact_zabs = 15;
 
 // PCB information
 pcb_t = 1.6;
-pcb_w = 28;
+pcb_w = 30;
 pcb_l = 53;
-pcb_z = 13.5-pcb_t;
-pcb_x = 6.5;
+pcb_z = contact_zabs-pcb_t-base_t;
+pcb_x = 5;
 
 // USB connector cutout
 // MOLEX 1050170001
-usb_t = 3.75;
+usb_h = 3.75;
 usb_w = 9.5;
 
 // "superstructure"
-super_w = base_w - ledge_t2 + ledge_t1;
-super_l = base_l - 2*ledge_t;
+super_z = base_t;  // the "altitude" that most everything is actually referenced to!
+super_w = base_w - ledge_t2 + ledge_t1; // width (short edge)
+super_l = base_l - 2*ledge_t;  // length (long edge)
 super_h = 5.7;  // the "straight rise" from baseplate
-super_z = base_t;  // the "altitude" at which everything starts
-super_wall_t = 1.5;
-super_floor_t = 0.5;
+super_wall_t = 1.75;
+super_floor_t = 0.5; // additional floor thickness
 round_rad = (pcb_z+pcb_t+super_z)/2;
 
-// latch 'tab' is extruded 2D
-latch_tab_t = super_wall_t + 0.75;
+// latch 'tab' is an extruded polygon
+latch_tab_t = super_wall_t + 1.0; // extent of tab past wall
 latch_tab_h = 2.8;
 latch_tab_t2 = 0.25;
-latch_tab_w = 16.9;
-latch_tab_z = 4.95;
+latch_tab_w = 17.0;
+latch_tab_z = 5.0;   // relative to super_z
 
 p0 = [0, 0];
 p1 = [0, latch_tab_h];
@@ -57,7 +62,7 @@ p2 = [latch_tab_t2,latch_tab_h];
 p3 = [latch_tab_t,0];
 tab_points = [p0, p1, p2, p3];
     
-// hinge cutouts is extruded 2D
+// hinge cutout is extruded 2D
 latch_tab_w2 = 12.0;
 latch_tab_h2 = super_h+latch_tab_h;
 
@@ -90,16 +95,17 @@ function RoundedBossHoleCenter(side,height,hole_dia) = [side/2,side/2,0];
 /* 
   Define some "cuts" to export as DXF, to help
   guide the PCB size (cut 1) and PCB hole placement
-  (cut 2).
+  (cut 2). These are translated to place PCB corner at 
+  origin.  Note that the PCB model must be enabled, and
+  the PCB Z at 20, in order to make cut4 useful.
 
-  uncomment the projection.. and the desired translate line
+  uncomment the projection.. and the desired translate line. Render. Export as DXF
 */
 
 //projection(cut = true) 
-//translate([0,0,-base_t/2])   //cut1
-//translate([0,0,-pcb_z])   //cut2
-//translate([0,0,-10.5])  //cut3
-//translate([0,0,-20]) //cut4
+//translate([-pcb_x,-(base_l-pcb_l)/2,-base_t/2])   //cut1 = base extent
+//translate([-pcb_x,-(base_l-pcb_l)/2,-10.5])  //cut3 = cavity inside w.r.t PCB
+//translate([-pcb_x,-(base_l-pcb_l)/2,-20]) //cut4 = PCB cuts + contacts + holes
 
 union(){
 difference() {
@@ -111,7 +117,7 @@ difference() {
     cube(size=[base_w, base_l, base_t]);
         
     // the superstructure inner volume
-    translate([-0.75, 1.25, super_z])
+    translate([-ledge_t1, ledge_t, super_z])
     cube([super_w, super_l,super_h]); 
 
     // the locking tab
@@ -120,7 +126,7 @@ difference() {
     linear_extrude(height=latch_tab_w) polygon(tab_points);
         
     // the rounded rear wall
-    translate([-ledge_t1+5.5,ledge_t,round_rad]) 
+    translate([-ledge_t1+6,ledge_t,round_rad]) 
     rotate([-90,0,0]) 
     cylinder(r=round_rad,h=super_l);
         
@@ -129,40 +135,38 @@ difference() {
     rotate([-90,0,0]) 
     cylinder(r=round_rad,h=super_l/2-latch_tab_w/2);
 
-    translate([-0.75+super_w-round_rad,base_l-ledge_t,round_rad]) 
+    translate([-ledge_t1+super_w-round_rad,base_l-ledge_t,round_rad]) 
     rotate([90,0,0]) 
     cylinder(r=round_rad,h=super_l/2-latch_tab_w/2);
         
     // complete the side walls
     translate ([(5-0.75),ledge_t,super_z])
-    cube([super_w-12,super_wall_t,2*round_rad-super_z]);        
-
-    translate ([(5-0.75),base_l-ledge_t-super_wall_t,super_z])
-    cube([super_w-12,super_wall_t,2*round_rad-super_z]);
+    cube([super_w-12,super_l,2*round_rad-super_z]); 
+    
     }
     
 // subtractive items            
     
     // remove the locking tab release slot
-    translate([base_w - 1.85,1.25+(super_l/2)-(latch_tab_w*0.9/2),-0.25]) 
-    cube([2,latch_tab_w*0.9,2]);
+    translate([base_w - 1.85,1.25+(super_l/2)-(latch_tab_w*0.8/2),-0.25]) 
+    cube([2,latch_tab_w*0.8,2]);
     
     // remove the polarizing baseplate notch
-    translate([13.8,-1.25,-0.5]) cube([16.4,2.5,2]);
+    translate([base_w1,-1.25,-0.5]) cube([base_w2,2.50,2]);
         
     // remove the two hinge cutouts
-    translate([-1-super_wall_t+super_w,1.25+(super_l/2)-(latch_tab_w/2)-0.1,super_z])
+    translate([super_w-super_wall_t-1,ledge_t+(super_l/2)-(latch_tab_w/2)-0.1,super_z+0.75])
     rotate([90,0,90])
     linear_extrude(height=2*super_wall_t)
     polygon(cutout_points);
     
-    translate([-1+super_wall_t+super_w,1.25+(super_l/2)+(latch_tab_w/2)+0.1,super_z])
+    translate([-1+super_wall_t+super_w,ledge_t+(super_l/2)+(latch_tab_w/2)+0.1,super_z+0.75])
     rotate([90,0,-90]) 
     linear_extrude(height=2*super_wall_t) 
     polygon(cutout_points);
 
     // flatten the rounded wall edges
-    translate([-2, 1.25+super_wall_t, super_z+11.5])
+    translate([-2, 1.25+super_wall_t, super_z+12.5])
     cube([5,super_l-2*super_wall_t,5]);
     translate([base_w-4, 1.25+super_wall_t, super_z+10])
     cube([5,super_l-2*super_wall_t,5]);
@@ -172,16 +176,29 @@ difference() {
     cube([pcb_w, pcb_l+4, pcb_t+1]);
     
     // remove cutout for USB micro B
-    translate([pcb_x+6,0,super_z+pcb_z-usb_t])
-    cube([usb_w,5,5]);
+    translate([pcb_x+6,0,super_z+pcb_z-usb_h])
+    cube([usb_w,4*super_wall_t,2*usb_h]);
 
     // remove the superstructure insides
-    translate([-0.75+super_wall_t, 1.25+super_wall_t, super_z+super_floor_t])
+    translate([super_wall_t-ledge_t1, ledge_t+super_wall_t, super_z+super_floor_t])
     cube([super_w-2*super_wall_t, super_l-2*super_wall_t, 20]); 
- 
+    
+    // etch some text into the floor
+    translate([base_w/2,base_l/2,super_z])
+    rotate([0,0,90])
+    linear_extrude(3)
+    text( "0v5", size= 12, ,halign = "center", valign = "bottom" );
+    
+// LATCH TEST
+    translate ([-ledge_t2,0,latch_tab_h+latch_tab_z+super_z+1])
+    cube([base_w,base_l,20]);
+    
+    translate ([-ledge_t2-2,0,super_z+2])
+    rotate([0,-8,0])
+    cube([base_w+3,base_l,20]);
 }
 
-
+/*
 // mounting screw bosses
 boss_l = 4.5;
 boss_dia = 2.1;
@@ -205,10 +222,13 @@ rotate([0,0,180])
 RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
 h4 = [pcb_x+pcb_w-boss_l/2,base_l-ledge_t-super_wall_t+boss_inset-boss_l/2,0];
 
+//*/
+  
 
+/*
 // uncomment this block if a pcb "model" is desired
 pcb_model_z = 20;
-pcb_model_z = pcb_z+pcb_t/2;
+pcb_model_z = pcb_z+super_z;
 //hole_dia = 0.086 * 25.4;
 pad_width = 5;
 pad_length = 15;

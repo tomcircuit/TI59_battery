@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name TI59_battery-rescue)(type Legacy)(uri ${KIPRJMOD}/TI59_battery-rescue.lib)(options "")(descr ""))
+)

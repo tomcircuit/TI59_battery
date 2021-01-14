@@ -5,11 +5,11 @@ $Descr USLetter 11000 8500
 encoding utf-8
 Sheet 1 1
 Title "TI-59 Calculator Battery Pack"
-Date "2021-01-14"
+Date "2020-12-02"
 Rev "2"
 Comp "tomcircuit@gmail.com"
-Comment1 "CC BY-SA 4.0"
-Comment2 "https://github.com/tomcircuit/TI_calculator"
+Comment1 "https://github.com/tomcircuit/TI_calculator"
+Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
@@ -27,7 +27,7 @@ F 5 "MCP73831T-2ACI/OTCT-ND" H 3800 3950 50  0001 C CNN "DigiKey"
 	1    0    0    -1  
 $EndComp
 $Comp
-L TI59_battery-rescue:USB_B_Micro-Connector J1
+L Connector:USB_B_Micro J1
 U 1 1 5FA30285
 P 2100 3750
 F 0 "J1" H 2157 4217 50  0000 C CNN
