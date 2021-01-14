@@ -8,11 +8,13 @@ The basic idea is to use a gold-flashed (ENIG) PCB as the contact substrate, and
  
 ## The Housing
 I  have several original TI BP01 battery packs, so I was able to measure it and create a 3D model using OpenSCAD. This is essentially a 3D solid 'programming language' which for me is much easier to work with than a 'real' 3D CAD program. 
+TI-59_LiPo_holder_0v5 is the latest version of holder, to be verified when PCBs are available.
 
 ## The PCB 
 The PCB holds the USB micro B connector, the charging circuitry, the protection circuitry, a connector for the LiPo battery, and most importantly the pads that mate with the contacts in the calculator.  The overall size of the PCB is 53mm x 28mm. The material is 1.6mm thick FR4. So that the contact pads do not  tarnish over time, I chose a gold-flash treatment (ENIG). 
 
 The schematic and PCB were designed using KiCAD. Note that the PCB can accommodate either a JST or 0.1" two pin battery connector type
+PCB is ordered from PCBWay on 1/14/2021
 
 ## The LiPo Battery
 I wanted a 1S (3.7V) LiPo battery in the neighborhood of 1200mAhr that would fit within the confines of the original pack envelope. This led me to a size "103040" LiPo battery. I prefer the JST connector, so I found one with that connector type. The PCB can accommodate either JST or "two pin" connectors, so there's some flexibility here. 
@@ -29,6 +31,6 @@ Install the pack into the calculator,
 
 
 
->December 26, 2020
+>January 14, 2021
 >Tom LeMense
 > Written with [StackEdit](https://stackedit.io/).
