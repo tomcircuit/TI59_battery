@@ -5,9 +5,9 @@
 
   Dimensions measured from several TI-58 and TI-59 calculators and a BP-1.
 
-  Version 0.5
+  Version 0.6
   T. LeMense
-  January 8, 2021
+  January 21, 2021
 */
 
 
@@ -26,7 +26,7 @@ ledge_t1 = 0.75; // ledge step-back along curved long side
 ledge_t2 = 2.1;  // ledge along latch side (measured)
 
 // contact Z offset (absolute to bottom of base, measured)
-contact_zabs = 15;
+contact_zabs = 13.5;
 
 // PCB information
 pcb_t = 1.6;
@@ -50,7 +50,7 @@ super_floor_t = 0.5; // additional floor thickness
 round_rad = (pcb_z+pcb_t+super_z)/2;
 
 // latch 'tab' is an extruded polygon
-latch_tab_t = super_wall_t + 1.0; // extent of tab past wall
+latch_tab_t = super_wall_t + 1.1; // extent of tab past wall
 latch_tab_h = 2.8;
 latch_tab_t2 = 0.25;
 latch_tab_w = 17.0;
@@ -187,31 +187,31 @@ difference() {
     translate([base_w/2,base_l/2,super_z])
     rotate([0,0,90])
     linear_extrude(3)
-    text( "0v5", size= 12, ,halign = "center", valign = "bottom" );
+    text( "0v6", size= 12, ,halign = "center", valign = "bottom" );
     
 }
 
 // mounting screw bosses
 boss_l = 4.5;
-boss_dia = 2.1;
-boss_inset = (boss_l - boss_dia)/4;
+boss_h_dia = 2.2;
+boss_inset = (boss_l - boss_h_dia)/4;
 
 translate([pcb_x,ledge_t+super_wall_t-boss_inset,super_z])
-RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
+RoundedBoss(boss_l,pcb_z,boss_h_dia);  // for #2 screw
 h1 = [pcb_x+boss_l/2,ledge_t+super_wall_t-boss_inset+boss_l/2,0];
 
 translate([pcb_x+pcb_w-boss_l,ledge_t+super_wall_t-boss_inset,super_z])
-RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
+RoundedBoss(boss_l,pcb_z,boss_h_dia);  // for #2 screw
 h2 = [pcb_x+pcb_w-boss_l/2,ledge_t+super_wall_t-boss_inset+boss_l/2,0];
 
 translate([pcb_x+boss_l,base_l-ledge_t-super_wall_t+boss_inset,super_z])
 rotate([0,0,180])
-RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
+RoundedBoss(boss_l,pcb_z,boss_h_dia);  // for #2 screw
 h3 = [pcb_x+boss_l/2,base_l-ledge_t-super_wall_t+boss_inset-boss_l/2,0];
 
 translate([pcb_x+pcb_w,base_l-ledge_t-super_wall_t+boss_inset,super_z])
 rotate([0,0,180])
-RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
+RoundedBoss(boss_l,pcb_z,boss_h_dia);  // for #2 screw
 h4 = [pcb_x+pcb_w-boss_l/2,base_l-ledge_t-super_wall_t+boss_inset-boss_l/2,0];
 
 

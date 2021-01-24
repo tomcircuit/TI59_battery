@@ -3,11 +3,19 @@
   This is intended to hold a PCB and a LiPo battery,
   and charge from USB. 
 
-  Dimensions measured from several TI-58 and TI-59 calculators and a BP-1.
+  Dimensions measured from several TI-58 and TI-59 calculators and two BP-1A packs.
+  
+  0.4 and earlier - very rough 
+  
+  0.5 - extended tab overhang to increase engagement with calculator latch
+  
+  0.6 - reduced contact_zabs to 13.5 to prevent PCB screws and LED from interfering with inside of TI-59
+  
+  0.7 - rounded cutout on inside of tab hinge to help de-stress and prevent breakage. Increased slope of latch tab to make insertion into calculator easier
 
-  Version 0.5
+  Version 0.7
   T. LeMense
-  January 8, 2021
+  January 21, 2021
 */
 
 
@@ -25,8 +33,9 @@ ledge_t = 1.4;  // ledge along short sides (improved)
 ledge_t1 = 0.75; // ledge step-back along curved long side
 ledge_t2 = 2.1;  // ledge along latch side (measured)
 
-// contact Z offset (absolute to bottom of base, measured)
-contact_zabs = 15;
+//contact Z offset (absolute to bottom of base)
+//keep below 15 to avoid interference with innards of TI59!
+contact_zabs = 13.5; 
 
 // PCB information
 pcb_t = 1.6;
@@ -41,20 +50,19 @@ usb_h = 3.75;
 usb_w = 9.5;
 
 // "superstructure"
-super_z = base_t;  // the "altitude" that most everything is actually referenced to!
 super_w = base_w - ledge_t2 + ledge_t1; // width (short edge)
 super_l = base_l - 2*ledge_t;  // length (long edge)
 super_h = 5.7;  // the "straight rise" from baseplate
 super_wall_t = 1.75;
 super_floor_t = 0.5; // additional floor thickness
-round_rad = (pcb_z+pcb_t+super_z)/2;
+round_rad = (pcb_z+pcb_t+base_t)/2;
 
 // latch 'tab' is an extruded polygon
-latch_tab_t = super_wall_t + 1.0; // extent of tab past wall
-latch_tab_h = 2.8;
-latch_tab_t2 = 0.25;
+latch_tab_t = super_wall_t + 1.15; // extent of tab past wall
+latch_tab_h = 4;
+latch_tab_t2 = 0.5;
 latch_tab_w = 17.0;
-latch_tab_z = 5.0;   // relative to super_z
+latch_tab_z = 5.0;   // relative to base_t
 
 p0 = [0, 0];
 p1 = [0, latch_tab_h];
@@ -64,7 +72,7 @@ tab_points = [p0, p1, p2, p3];
     
 // hinge cutout is extruded 2D
 latch_tab_w2 = 12.0;
-latch_tab_h2 = super_h+latch_tab_h;
+latch_tab_h2 = super_h+latch_tab_h+1;
 
 p4 = [0, 0];
 p5 = [0, latch_tab_h2];
@@ -81,11 +89,11 @@ module RoundedBoss(side,height,hole_dia){
         union() {
         cube([side,side/2,height]);
         translate([side/2,side/2,0])
-        cylinder(r=side/2,h=height);
+        cylinder(d=side,h=height);
         }
         
         translate([side/2,side/2,height/3])
-        cylinder(r=hole_dia/2,h=height/1.5);
+        cylinder(d=hole_dia,h=height/1.5);
     }
 }
 
@@ -117,11 +125,11 @@ difference() {
     cube(size=[base_w, base_l, base_t]);
         
     // the superstructure inner volume
-    translate([-ledge_t1, ledge_t, super_z])
+    translate([-ledge_t1, ledge_t, base_t])
     cube([super_w, super_l,super_h]); 
 
     // the locking tab
-    translate([-ledge_t1-super_wall_t+super_w,ledge_t+(super_l/2)+(latch_tab_w/2),latch_tab_z+super_z]) 
+    translate([-ledge_t1-super_wall_t+super_w,ledge_t+(super_l/2)+(latch_tab_w/2),latch_tab_z+base_t]) 
     rotate([90,0,0]) 
     linear_extrude(height=latch_tab_w) polygon(tab_points);
         
@@ -130,7 +138,7 @@ difference() {
     rotate([-90,0,0]) 
     cylinder(r=round_rad,h=super_l);
         
-    // the two rounded walls on either side of latch
+    // the two walls to either side of latch
     translate([-ledge_t1+super_w-round_rad,ledge_t,round_rad]) 
     rotate([-90,0,0]) 
     cylinder(r=round_rad,h=super_l/2-latch_tab_w/2);
@@ -140,95 +148,91 @@ difference() {
     cylinder(r=round_rad,h=super_l/2-latch_tab_w/2);
         
     // complete the side walls
-    translate ([(5-0.75),ledge_t,super_z])
-    cube([super_w-12,super_l,2*round_rad-super_z]); 
+    translate ([(5-0.75),ledge_t,base_t])
+    cube([super_w-12,super_l,2*round_rad-base_t]); 
     
     }
     
 // subtractive items            
     
-    // remove the locking tab release slot
+    // remove tab release slot from base
     translate([base_w - 1.85,1.25+(super_l/2)-(latch_tab_w*0.8/2),-0.25]) 
     cube([2,latch_tab_w*0.8,2]);
     
-    // remove the polarizing baseplate notch
+    // remove polarizing notch from base
     translate([base_w1,-1.25,-0.5]) cube([base_w2,2.50,2]);
         
     // remove the two hinge cutouts
-    translate([super_w-super_wall_t-1,ledge_t+(super_l/2)-(latch_tab_w/2)-0.1,super_z+0.75])
+    translate([super_w-super_wall_t-1,ledge_t+(super_l/2)-(latch_tab_w/2)-0.1,base_t+0.75])
     rotate([90,0,90])
     linear_extrude(height=2*super_wall_t)
     polygon(cutout_points);
     
-    translate([-1+super_wall_t+super_w,ledge_t+(super_l/2)+(latch_tab_w/2)+0.1,super_z+0.75])
+    translate([-1+super_wall_t+super_w,ledge_t+(super_l/2)+(latch_tab_w/2)+0.1,base_t+0.5])
     rotate([90,0,-90]) 
     linear_extrude(height=2*super_wall_t) 
     polygon(cutout_points);
+    
+    // de-stress the tab hinge
+    translate([-ledge_t1+super_w-2.5,ledge_t+(super_l/2)-(latch_tab_w/2)-0.1,base_t+2.25])
+    rotate([-90,0,0])
+    cylinder(r=1.75,h=latch_tab_w);
 
     // flatten the rounded wall edges
-    translate([-2, 1.25+super_wall_t, super_z+12.5])
+    translate([-2, 1.25+super_wall_t, base_t+12.5])
     cube([5,super_l-2*super_wall_t,5]);
-    translate([base_w-4, 1.25+super_wall_t, super_z+10])
+    translate([base_w-4, 1.25+super_wall_t, base_t+10])
     cube([5,super_l-2*super_wall_t,5]);
 
     // remove cutout for PCB
-    translate([pcb_x,0,super_z+pcb_z])
+    translate([pcb_x,0,base_t+pcb_z])
     cube([pcb_w, pcb_l+4, pcb_t+1]);
     
     // remove cutout for USB micro B
-    translate([pcb_x+6,0,super_z+pcb_z-usb_h])
+    translate([pcb_x+6,0,base_t+pcb_z-usb_h])
     cube([usb_w,4*super_wall_t,2*usb_h]);
 
     // remove the superstructure insides
-    translate([super_wall_t-ledge_t1, ledge_t+super_wall_t, super_z+super_floor_t])
+    translate([super_wall_t-ledge_t1, ledge_t+super_wall_t, base_t+super_floor_t])
     cube([super_w-2*super_wall_t, super_l-2*super_wall_t, 20]); 
     
     // etch some text into the floor
-    translate([base_w/2,base_l/2,super_z])
+    translate([base_w/2,base_l/2,base_t])
     rotate([0,0,90])
     linear_extrude(3)
-    text( "0v5", size= 12, ,halign = "center", valign = "bottom" );
+    text( "0v7", size= 10, ,halign = "center", valign = "bottom" );
     
-// LATCH TEST
-    translate ([-ledge_t2,0,latch_tab_h+latch_tab_z+super_z+1])
-    cube([base_w,base_l,20]);
-    
-    translate ([-ledge_t2-2,0,super_z+2])
-    rotate([0,-8,0])
-    cube([base_w+3,base_l,20]);
 }
 
-/*
 // mounting screw bosses
 boss_l = 4.5;
-boss_dia = 2.1;
-boss_inset = (boss_l - boss_dia)/4;
+boss_h_dia = 2.2;
+boss_inset = (boss_l - boss_h_dia)/4;
 
-translate([pcb_x,ledge_t+super_wall_t-boss_inset,super_z])
-RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
+translate([pcb_x,ledge_t+super_wall_t-boss_inset,base_t])
+RoundedBoss(boss_l,pcb_z,boss_h_dia);  // for #2 screw
 h1 = [pcb_x+boss_l/2,ledge_t+super_wall_t-boss_inset+boss_l/2,0];
 
-translate([pcb_x+pcb_w-boss_l,ledge_t+super_wall_t-boss_inset,super_z])
-RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
+translate([pcb_x+pcb_w-boss_l,ledge_t+super_wall_t-boss_inset,base_t])
+RoundedBoss(boss_l,pcb_z,boss_h_dia);  // for #2 screw
 h2 = [pcb_x+pcb_w-boss_l/2,ledge_t+super_wall_t-boss_inset+boss_l/2,0];
 
-translate([pcb_x+boss_l,base_l-ledge_t-super_wall_t+boss_inset,super_z])
+translate([pcb_x+boss_l,base_l-ledge_t-super_wall_t+boss_inset,base_t])
 rotate([0,0,180])
-RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
+RoundedBoss(boss_l,pcb_z,boss_h_dia);  // for #2 screw
 h3 = [pcb_x+boss_l/2,base_l-ledge_t-super_wall_t+boss_inset-boss_l/2,0];
 
-translate([pcb_x+pcb_w,base_l-ledge_t-super_wall_t+boss_inset,super_z])
+translate([pcb_x+pcb_w,base_l-ledge_t-super_wall_t+boss_inset,base_t])
 rotate([0,0,180])
-RoundedBoss(boss_l,pcb_z,boss_dia);  // for #2 screw
+RoundedBoss(boss_l,pcb_z,boss_h_dia);  // for #2 screw
 h4 = [pcb_x+pcb_w-boss_l/2,base_l-ledge_t-super_wall_t+boss_inset-boss_l/2,0];
 
-//*/
-  
+
 
 /*
 // uncomment this block if a pcb "model" is desired
 pcb_model_z = 20;
-pcb_model_z = pcb_z+super_z;
+//pcb_model_z = pcb_z+base_t;
 //hole_dia = 0.086 * 25.4;
 pad_width = 5;
 pad_length = 15;
